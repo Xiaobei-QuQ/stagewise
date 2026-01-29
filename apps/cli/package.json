@@ -37,6 +37,7 @@
     "@stagewise-plugins/react": "workspace:*",
     "@stagewise-plugins/vue": "workspace:*",
     "@stagewise/agent-client": "workspace:*",
+    "@stagewise/agent-claude-code": "workspace:*",
     "@stagewise/agent-runtime-node": "workspace:*",
     "@stagewise/api-client": "1.4.0",
     "@stagewise/karton": "workspace:*",

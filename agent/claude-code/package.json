@@ -1,0 +1,39 @@
+{
+  "name": "@stagewise/agent-claude-code",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.cjs",
+    "dist/**/*.d.ts"
+  ],
+  "scripts": {
+    "build": "pnpm run clean && pnpm run build:types && pnpm run build:bundle",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:bundle": "tsx build.ts",
+    "dev": "tsx build.ts --watch",
+    "clean": "rimraf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@stagewise/karton": "workspace:*",
+    "@stagewise/karton-contract": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.9",
+    "rimraf": "^5.0.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.0.0"
+  }
+}

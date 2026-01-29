@@ -38,6 +38,7 @@ describe('plugin-loader', () => {
       bridgeMode: false,
       autoPlugins: true,
       plugins: [],
+      agent: 'default',
     };
 
     beforeEach(() => {

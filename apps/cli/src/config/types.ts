@@ -1,3 +1,5 @@
+export type AgentType = 'default' | 'claude-code';
+
 export interface CliArgs {
   port: number;
   appPort?: number;
@@ -6,6 +8,8 @@ export interface CliArgs {
   verbose: boolean;
   token?: string;
   bridgeMode: boolean;
+  agent: AgentType;
+  claudeCommand?: string;
 }
 
 export interface ConfigFile {
@@ -27,4 +31,6 @@ export interface Config {
   autoPlugins: boolean;
   plugins: Array<string | { name: string; path?: string; url?: string }>;
   eddyMode?: string;
+  agent: AgentType;
+  claudeCommand?: string;
 }

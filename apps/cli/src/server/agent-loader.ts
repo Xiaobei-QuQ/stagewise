@@ -2,10 +2,11 @@ import { printInfoMessages } from '@/utils/print-info-messages.js';
 import { log } from '../utils/logger.js';
 import configResolver from '@/config/index.js';
 import { Agent } from '@stagewise/agent-client';
+import { ClaudeCodeAgent } from '@stagewise/agent-claude-code';
 import { ClientRuntimeNode } from '@stagewise/agent-runtime-node';
 import { analyticsEvents } from '@/utils/telemetry.js';
 
-let agentInstance: Agent | null = null;
+let agentInstance: Agent | ClaudeCodeAgent | null = null;
 
 /**
  * Loads and initializes the agent server
@@ -13,9 +14,29 @@ let agentInstance: Agent | null = null;
 export async function loadAndInitializeAgent(
   accessToken: string,
   refreshToken: string,
-): Promise<{ success: boolean; wss?: any }> {
+): Promise<{ success: boolean; wss?: unknown }> {
   try {
-    // Validate we have the required constructors
+    const config = configResolver.getConfig();
+
+    // Use Claude Code agent if specified
+    if (config.agent === 'claude-code') {
+      log.info('Using Claude Code agent');
+
+      agentInstance = ClaudeCodeAgent.getInstance({
+        command: config.claudeCommand ?? 'claude-internal',
+        cwd: config.dir,
+        skipPermissions: true,
+      });
+
+      const agentServer = await agentInstance.initialize();
+
+      return {
+        success: true,
+        wss: agentServer.wss,
+      };
+    }
+
+    // Default agent
     if (!Agent || typeof Agent.getInstance !== 'function') {
       throw new Error('Agent class not found or invalid');
     }
@@ -23,8 +44,6 @@ export async function loadAndInitializeAgent(
     if (!ClientRuntimeNode || typeof ClientRuntimeNode !== 'function') {
       throw new Error('ClientRuntimeNode class not found or invalid');
     }
-
-    const config = configResolver.getConfig();
 
     // Create client runtime instance
     const clientRuntime = new ClientRuntimeNode({

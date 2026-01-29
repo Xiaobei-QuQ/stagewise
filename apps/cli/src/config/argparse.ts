@@ -52,7 +52,17 @@ program
     '-t, --token <token>',
     'If set, will use the given auth token instead of using or asked for a stored one',
   )
-  .option('-b', 'Bridge mode - will not start the coding agent server');
+  .option('-b', 'Bridge mode - will not start the coding agent server')
+  .option(
+    '--agent <type>',
+    'Agent type to use: default | claude-code',
+    'default',
+  )
+  .option(
+    '--claude-command <cmd>',
+    'Claude Code CLI command (for claude-code agent)',
+    'claude-internal',
+  );
 
 // Add auth command with subcommands
 const authCommand = program
@@ -151,6 +161,8 @@ let silent: boolean;
 let verbose: boolean;
 let token: string | undefined;
 let bridgeMode: boolean;
+let agent: string;
+let claudeCommand: string | undefined;
 
 // Get options from the main program (global options are available on program)
 const options = program.opts();
@@ -165,6 +177,8 @@ if (commandExecuted === 'auth' || commandExecuted === 'telemetry') {
   verbose = false;
   token = undefined;
   bridgeMode = false;
+  agent = 'default';
+  claudeCommand = undefined;
 } else {
   const {
     port: parsedPort,
@@ -174,6 +188,8 @@ if (commandExecuted === 'auth' || commandExecuted === 'telemetry') {
     verbose: parsedVerbose,
     token: parsedToken,
     b: parsedBridgeMode,
+    agent: parsedAgent,
+    claudeCommand: parsedClaudeCommand,
   } = options as {
     port?: number;
     appPort?: number;
@@ -182,6 +198,8 @@ if (commandExecuted === 'auth' || commandExecuted === 'telemetry') {
     verbose: boolean;
     token?: string;
     b: boolean;
+    agent: string;
+    claudeCommand?: string;
   };
 
   // Validate port conflicts
@@ -196,6 +214,8 @@ if (commandExecuted === 'auth' || commandExecuted === 'telemetry') {
   verbose = parsedVerbose;
   token = parsedToken;
   bridgeMode = parsedBridgeMode;
+  agent = parsedAgent;
+  claudeCommand = parsedClaudeCommand;
 }
 
 // Export the parsed values
@@ -207,6 +227,8 @@ export {
   verbose,
   token,
   bridgeMode,
+  agent,
+  claudeCommand,
   commandExecuted,
   authSubcommand,
   telemetrySubcommand,

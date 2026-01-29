@@ -90,6 +90,8 @@ export class ConfigResolver {
         autoPlugins: false, // Disabled in bridge mode
         plugins: [],
         eddyMode: configFile?.eddyMode,
+        agent: args.agent as Config['agent'],
+        claudeCommand: args.claudeCommand,
       };
 
       return this.config;
@@ -240,6 +242,8 @@ export class ConfigResolver {
       autoPlugins,
       plugins,
       eddyMode: configFile?.eddyMode,
+      agent: args.agent as Config['agent'],
+      claudeCommand: args.claudeCommand,
     };
 
     return this.config;
