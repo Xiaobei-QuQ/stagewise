@@ -61,7 +61,7 @@ program
   .option(
     '--claude-command <cmd>',
     'Claude Code CLI command (for claude-code agent)',
-    'claude-internal',
+    'claude',
   );
 
 // Add auth command with subcommands

@@ -23,7 +23,7 @@ export async function loadAndInitializeAgent(
       log.info('Using Claude Code agent');
 
       agentInstance = ClaudeCodeAgent.getInstance({
-        command: config.claudeCommand ?? 'claude-internal',
+        command: config.claudeCommand ?? 'claude',
         cwd: config.dir,
         skipPermissions: true,
       });

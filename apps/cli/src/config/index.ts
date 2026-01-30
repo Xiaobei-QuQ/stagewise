@@ -174,9 +174,11 @@ export class ConfigResolver {
     }
 
     // Resolve authentication token
+    // Skip auth for non-default agents (like claude-code) and bridge mode
     let token: string | undefined;
+    const skipAuth = args.bridgeMode || args.agent !== 'default';
 
-    if (!args.bridgeMode) {
+    if (!skipAuth) {
       // Check if token is provided via CLI argument
       if (args.token) {
         // Token provided via CLI argument, use it directly

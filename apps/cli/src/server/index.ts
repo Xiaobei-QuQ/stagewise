@@ -236,17 +236,11 @@ export const getServer = async () => {
 
     if (!config.bridgeMode) {
       try {
-        // Get access token for agent
-        const token = await oauthManager.getToken();
-        if (token) {
-          // Load and initialize agent using the loader module
-          // This will register agent routes at /stagewise-toolbar-app/server/*
-          const agentResult = await loadAndInitializeAgent(
-            token.accessToken,
-            token.refreshToken,
-          );
+        // For claude-code agent, no token is needed
+        if (config.agent === 'claude-code') {
+          const agentResult = await loadAndInitializeAgent('', '');
           if (agentResult.success && agentResult.wss) {
-            agentWss = agentResult.wss;
+            agentWss = agentResult.wss as WebSocketServer;
             log.debug('Received websocket server from agent loader');
             agentWsPath = '/stagewise-toolbar-app/karton';
             log.debug(
@@ -254,10 +248,29 @@ export const getServer = async () => {
             );
           }
         } else {
-          log.debug(
-            'Agent server not initialized - no authentication token available',
-          );
-          log.debug('Run "stagewise auth login" to enable agent functionality');
+          // Get access token for default agent
+          const token = await oauthManager.getToken();
+          if (token) {
+            // Load and initialize agent using the loader module
+            // This will register agent routes at /stagewise-toolbar-app/server/*
+            const agentResult = await loadAndInitializeAgent(
+              token.accessToken,
+              token.refreshToken,
+            );
+            if (agentResult.success && agentResult.wss) {
+              agentWss = agentResult.wss as WebSocketServer;
+              log.debug('Received websocket server from agent loader');
+              agentWsPath = '/stagewise-toolbar-app/karton';
+              log.debug(
+                `Agent WebSocket server configured for path: ${agentWsPath}`,
+              );
+            }
+          } else {
+            log.debug(
+              'Agent server not initialized - no authentication token available',
+            );
+            log.debug('Run "stagewise auth login" to enable agent functionality');
+          }
         }
       } catch (error) {
         log.error(
