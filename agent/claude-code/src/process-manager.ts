@@ -3,6 +3,7 @@ import type { ClaudeCodeAgentConfig, ProcessHandle } from './types.js';
 
 export function spawnClaudeCode(
   config: ClaudeCodeAgentConfig,
+  sessionId?: string,
   onExit?: (code: number | null) => void
 ): ProcessHandle {
   const args = [
@@ -13,6 +14,10 @@ export function spawnClaudeCode(
     'stream-json',
     '--verbose',
   ];
+
+  if (sessionId) {
+    args.push('--resume', sessionId);
+  }
 
   if (config.skipPermissions) {
     args.push('--dangerously-skip-permissions');
