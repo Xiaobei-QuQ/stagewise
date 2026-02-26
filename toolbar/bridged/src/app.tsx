@@ -15,7 +15,9 @@ export function App(config?: InternalToolbarConfig) {
   const pathname = window.location.pathname || '/';
   const search = window.location.search || '';
   const hash = window.location.hash || '';
-  const initialUrl = pathname + search + hash;
+  // Use proxy prefix so the server can distinguish iframe loads from
+  // top-level navigations even when Sec-Fetch-Dest headers are absent.
+  const initialUrl = `/__stagewise_proxy__${pathname}${search}${hash}`;
 
   return (
     <>

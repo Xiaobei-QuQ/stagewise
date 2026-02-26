@@ -5,32 +5,55 @@ import { errorPage } from './error-page';
 import { log } from '../utils/logger';
 import { applyHeaderRewrites } from './proxy-utils/headers-rewrites';
 
+export const PROXY_PREFIX = '/__stagewise_proxy__';
+
 export const proxy = createProxyMiddleware({
   changeOrigin: true,
   pathFilter: (pathname: string, req: IncomingMessage) => {
-    // Don't proxy if:
-    // - path starts with "stagewise-toolbar-app" (including agent server routes)
-    // - sec-fetch-dest header equals "document"
-    const isToolbarPath = pathname.startsWith('/stagewise-toolbar-app');
-    const isDocument = req.headers['sec-fetch-dest'] === 'document';
+    // Always proxy requests with the proxy prefix (iframe navigation)
+    if (pathname.startsWith(PROXY_PREFIX)) {
+      log.debug(`Proxying (prefixed): ${pathname}`);
+      return true;
+    }
 
-    if (isToolbarPath || isDocument) {
-      log.debug(
-        `Not proxying ${pathname} - toolbar: ${isToolbarPath}, document: ${isDocument}`,
-      );
+    // Never proxy toolbar-app asset requests
+    if (pathname.startsWith('/stagewise-toolbar-app')) {
       return false;
     }
 
-    // Proxy all other requests
-    log.debug(`Proxying request: ${pathname}`);
+    // Use sec-fetch-dest if available (normal browsers with full headers)
+    const secFetchDest = req.headers['sec-fetch-dest'];
+    if (secFetchDest !== undefined) {
+      if (secFetchDest === 'document') {
+        log.debug(`Not proxying ${pathname} - document navigation`);
+        return false;
+      }
+      log.debug(`Proxying request: ${pathname}`);
+      return true;
+    }
+
+    // When sec-fetch-dest is missing (e.g. remote access stripping headers):
+    // - HTML navigations (Accept starts with text/html) without the prefix
+    //   are top-level navigations → serve toolbar HTML
+    // - Everything else (JS, CSS, images, API calls) → proxy to dev server
+    const accept = req.headers['accept'] ?? '';
+    if (accept.startsWith('text/html')) {
+      log.debug(`Not proxying ${pathname} - html accept without prefix, serving toolbar`);
+      return false;
+    }
+
+    log.debug(`Proxying request (no sec-fetch-dest): ${pathname}`);
     return true;
   },
-  followRedirects: false, // Don't automatically follow redirects to prevent loops
+  pathRewrite: {
+    [`^${PROXY_PREFIX}`]: '',
+  },
+  followRedirects: false,
   router: () => {
     const config = configResolver.getConfig();
     return `http://localhost:${config.appPort}`;
   },
-  ws: false, // we handle websocket upgrades manually because we have multiple potential websocket servers
+  ws: false,
   cookieDomainRewrite: {
     '*': '',
   },

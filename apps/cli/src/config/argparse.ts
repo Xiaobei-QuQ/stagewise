@@ -27,7 +27,7 @@ let authSubcommand: string | undefined;
 let telemetrySubcommand: string | undefined;
 
 program
-  .name('stagewise')
+  .name('sloth-stagewise')
   .description('Stagewise CLI - Development Proxy & AI Coding Assistant')
   .version(process.env.CLI_VERSION ?? '0.0.1')
   .option<number>(

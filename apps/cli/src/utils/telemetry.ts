@@ -299,7 +299,7 @@ export class TelemetryManager {
       );
       console.log(
         chalk.gray(
-          '  To disable data collection completely, run: stagewise telemetry set off',
+          '  To disable data collection completely, run: sloth-stagewise telemetry set off',
         ),
       );
     }
@@ -315,7 +315,7 @@ export class TelemetryManager {
 
     console.log(
       chalk.gray(
-        "\nYou can update telemetry preferences by calling 'stagewise telemetry set'.\n",
+        "\nYou can update telemetry preferences by calling 'sloth-stagewise telemetry set'.\n",
       ),
     );
   }

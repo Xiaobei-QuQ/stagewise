@@ -1,8 +1,8 @@
 {
-  "name": "stagewise",
+  "name": "sloth-stagewise",
   "module": "src/index.ts",
   "type": "module",
-  "version": "0.11.2",
+  "version": "0.11.6",
   "description": "Stagewise CLI",
   "author": "stagewise GmbH",
   "license": "AGPL-3.0-only",
@@ -12,7 +12,7 @@
   },
   "private": false,
   "bin": {
-    "stagewise": "dist/index.cjs"
+    "sloth-stagewise": "dist/index.cjs"
   },
   "files": [
     "dist"

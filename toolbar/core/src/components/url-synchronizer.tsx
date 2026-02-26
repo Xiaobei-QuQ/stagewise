@@ -1,5 +1,19 @@
 import { useEffect, useRef } from 'react';
 
+const PROXY_PREFIX = '/__stagewise_proxy__';
+
+/** Strip the proxy prefix from a pathname if present */
+function stripPrefix(pathname: string): string {
+  return pathname.startsWith(PROXY_PREFIX)
+    ? pathname.slice(PROXY_PREFIX.length) || '/'
+    : pathname;
+}
+
+/** Add the proxy prefix to a pathname */
+function addPrefix(pathname: string): string {
+  return `${PROXY_PREFIX}${pathname}`;
+}
+
 interface UrlSynchronizerProps {
   appPort?: number;
   urlSyncConfig?: {
@@ -101,6 +115,7 @@ export function UrlSynchronizer({
       const parentSearch = window.location.search;
       const parentHash = window.location.hash;
 
+      // The iframe uses prefixed paths; compare without prefix
       const newUrl = parentPath + parentSearch + parentHash;
 
       try {
@@ -109,13 +124,16 @@ export function UrlSynchronizer({
           return;
         }
 
-        if (
-          iframeWindow.location.pathname +
-            iframeWindow.location.search +
-            iframeWindow.location.hash !==
-          newUrl
-        ) {
+        const iframeUrl =
+          stripPrefix(iframeWindow.location.pathname) +
+          iframeWindow.location.search +
+          iframeWindow.location.hash;
+
+        if (iframeUrl !== newUrl) {
           const navId = lockNavigation('parent');
+
+          // The URL set on the iframe must include the proxy prefix
+          const prefixedUrl = addPrefix(parentPath) + parentSearch + parentHash;
 
           // Queue navigation to prevent concurrent updates
           navigationQueue.current = navigationQueue.current.then(async () => {
@@ -123,10 +141,10 @@ export function UrlSynchronizer({
               // Use pushState/replaceState to avoid full page reloads
               // This prevents infinite redirect loops with 307 responses
               if (iframeWindow.history?.replaceState) {
-                iframeWindow.history.replaceState(null, '', newUrl);
+                iframeWindow.history.replaceState(null, '', prefixedUrl);
               } else {
                 // Fallback to location.href only if history API is not available
-                iframeWindow.location.href = newUrl;
+                iframeWindow.location.href = prefixedUrl;
               }
               // Wait for navigation to complete
               await new Promise((resolve) => setTimeout(resolve, 150));
@@ -163,7 +181,8 @@ export function UrlSynchronizer({
       }
 
       try {
-        const iframePath = iframeWindow.location.pathname;
+        // Strip proxy prefix from iframe path before syncing to parent
+        const iframePath = stripPrefix(iframeWindow.location.pathname);
         const iframeSearch = iframeWindow.location.search;
         const iframeHash = iframeWindow.location.hash;
 

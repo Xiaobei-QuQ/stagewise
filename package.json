@@ -1,5 +1,5 @@
 {
-  "name": "stagewise",
+  "name": "sloth-stagewise",
   "private": true,
   "scripts": {
     "build": "turbo run build",
