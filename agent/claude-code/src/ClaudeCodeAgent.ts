@@ -20,6 +20,7 @@ export class ClaudeCodeAgent {
   private karton: any = null;
   private config: ClaudeCodeAgentConfig;
   private currentProcess: ProcessHandle | null = null;
+  private chatSessions: Map<string, string> = new Map();
 
   private constructor(config: ClaudeCodeAgentConfig) {
     this.config = config;
@@ -47,6 +48,7 @@ export class ClaudeCodeAgent {
           });
         },
         deleteChat: async (chatId: string) => {
+          this.chatSessions.delete(chatId);
           if (this.karton!.state.activeChatId === chatId) {
             const nextChatId = Object.keys(this.karton!.state.chats).find(
               (id: string) => id !== chatId
@@ -131,7 +133,8 @@ export class ClaudeCodeAgent {
     const streamJsonMessage = buildStreamJsonMessage(input);
 
     // 3. spawn 子进程
-    this.currentProcess = spawnClaudeCode(this.config, () => {
+    const existingSessionId = this.chatSessions.get(chatId);
+    this.currentProcess = spawnClaudeCode(this.config, existingSessionId, () => {
       this.karton?.setState((draft: KartonContract['state']) => {
         draft.isWorking = false;
       });
@@ -206,7 +209,8 @@ export class ClaudeCodeAgent {
       }
 
       case 'system': {
-        if (event.subtype === 'init') {
+        if (event.subtype === 'init' && event.session_id) {
+          this.chatSessions.set(chatId, event.session_id);
           console.log('[claude-code] Initialized, session:', event.session_id);
         }
         break;
