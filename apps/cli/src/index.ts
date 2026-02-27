@@ -13,6 +13,7 @@ import {
   telemetryLevel,
   wrappedCommand,
   hasWrappedCommand,
+  noOpen,
 } from './config/argparse';
 import { printBanner } from './utils/banner';
 import { oauthManager } from './auth/oauth';
@@ -257,7 +258,8 @@ async function main() {
       // (auth flow will redirect the existing browser window)
       if (
         process.env.NODE_ENV !== 'test' &&
-        !configResolver.wasAuthFlowInitiated()
+        !configResolver.wasAuthFlowInitiated() &&
+        !noOpen
       ) {
         try {
           await open(serverUrl);

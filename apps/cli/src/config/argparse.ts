@@ -62,7 +62,8 @@ program
     '--claude-command <cmd>',
     'Claude Code CLI command (for claude-code agent)',
     'claude',
-  );
+  )
+  .option('--no-open', 'Do not automatically open the browser on startup');
 
 // Add auth command with subcommands
 const authCommand = program
@@ -163,6 +164,7 @@ let token: string | undefined;
 let bridgeMode: boolean;
 let agent: string;
 let claudeCommand: string | undefined;
+let noOpen: boolean;
 
 // Get options from the main program (global options are available on program)
 const options = program.opts();
@@ -179,6 +181,7 @@ if (commandExecuted === 'auth' || commandExecuted === 'telemetry') {
   bridgeMode = false;
   agent = 'default';
   claudeCommand = undefined;
+  noOpen = false;
 } else {
   const {
     port: parsedPort,
@@ -190,6 +193,7 @@ if (commandExecuted === 'auth' || commandExecuted === 'telemetry') {
     b: parsedBridgeMode,
     agent: parsedAgent,
     claudeCommand: parsedClaudeCommand,
+    open: parsedOpen,
   } = options as {
     port?: number;
     appPort?: number;
@@ -200,6 +204,7 @@ if (commandExecuted === 'auth' || commandExecuted === 'telemetry') {
     b: boolean;
     agent: string;
     claudeCommand?: string;
+    open: boolean;
   };
 
   // Validate port conflicts
@@ -216,6 +221,7 @@ if (commandExecuted === 'auth' || commandExecuted === 'telemetry') {
   bridgeMode = parsedBridgeMode;
   agent = parsedAgent;
   claudeCommand = parsedClaudeCommand;
+  noOpen = !parsedOpen;
 }
 
 // Export the parsed values
@@ -227,6 +233,7 @@ export {
   verbose,
   token,
   bridgeMode,
+  noOpen,
   agent,
   claudeCommand,
   commandExecuted,
